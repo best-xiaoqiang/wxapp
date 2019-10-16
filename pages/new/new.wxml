@@ -1,0 +1,23 @@
+
+<date-picker range="{{dateArr}}" bind:change="dateChange"></date-picker>
+<view class="item {{item.success ? '' : 'fail'}}" 
+    wx:for="{{list}}" 
+    wx:key="{{index}}" 
+    bindtap="itemTap" 
+    bind:longpress="itemLongTap"
+    data-index="{{index}}">
+    {{item.content}}
+</view>
+<view class="input-wrap">
+    <input type="text" placeholder="点击输入清单题目" value="{{inputValue}}" bindinput="input" auto-focus="{{true}}" focus="{{focus}}"/>
+    <checkbox-group bindchange="change">
+        <checkbox class="" checked="{{checkValue}}" color="green"></checkbox>
+    </checkbox-group>
+</view>
+<button class="btn" type="primary" bindtap="add">增加</button>
+<button class="btn" type="primary" bindtap="confirm">确定</button>
+<view class="desc">
+    <view>操作说明：</view>
+    <view>点击日期可选择目标的起始时间</view>
+    <view>点击清单题目可切换目标完成状态（绿色字体为完成）</view>
+</view>

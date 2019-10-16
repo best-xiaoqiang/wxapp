@@ -1,0 +1,9 @@
+<view class="time">
+    <picker class="" mode="date" value="{{dateStartValue}}" start="{{dateMin}}" end="{{dateMax}}"  bindchange="dateStartChange">
+        {{dateStartValue}}
+    </picker>
+    <text>至</text>
+    <picker class="" mode="date" value="{{dateEndValue}}" start="{{dateMin}}" end="{{dateMax}}"  bindchange="dateEndChange">
+        {{dateEndValue}}
+    </picker>
+</view>

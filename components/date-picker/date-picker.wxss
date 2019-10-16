@@ -1,0 +1,6 @@
+.time{
+    color: #919191;
+    font-size: 24rpx;
+    display: flex;
+    padding: 16rpx 0;
+}

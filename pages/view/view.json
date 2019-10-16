@@ -1,0 +1,5 @@
+{ "navigationBarTitleText": "目标达成情况",
+  "usingComponents": {
+    "date-picker": "/components/date-picker/date-picker"
+  }
+}

@@ -1,0 +1,9 @@
+<block wx:if="{{list && list.length}}">
+    <view class="item" wx:for="{{list}}" wx:key="{{index}}" data-item="{{item}}" bindtap="itemTap" bind:longpress="itemLongTap">
+        {{item.dateShow}}
+    </view>
+    <view class="desc">操作说明：长按删除</view>
+</block>
+<block wx:else>
+    <view class="desc">暂无清单</view>    
+</block>

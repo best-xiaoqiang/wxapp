@@ -1,0 +1,4 @@
+<view bindtap = "uploadTap">
+  点击上传
+</view>
+<canvas type="2d" id="myCanvas"></canvas>

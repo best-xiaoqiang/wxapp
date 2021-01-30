@@ -1,19 +1,5 @@
+@import '/static/css/base.wxss';
 page{
-  background: #F9F9FA;
   box-sizing: border-box;
-}
-.container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 200rpx 0;
-  box-sizing: border-box;
-} 
-.desc{
-  margin: 20rpx auto;
-  font-size: 24rpx;
-  color: #aaa;
-  text-align: center;
+  background: rgba(0, 0, 0, 1);
 }

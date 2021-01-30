@@ -1,0 +1,7 @@
+@import '/static/css/base.wxss';
+
+.option-list-comp{
+  padding: 40rpx;
+  margin: 0 auto;
+  padding-bottom: 20rpx;
+}

@@ -1,15 +1,19 @@
 const app = getApp()
 
 Page({
-  goNew(){
-    wx.navigateTo({
-      url: '/pages/new/new',
-    });
+  data: {
+    optionList: [
+      {
+        title: '三合一封面图',
+        path: '/pages/cover/cover'
+      }
+    ]
   },
-  goList(){
+  onShareAppMessage(){},
+  optionTap(e){
+    let {item} = e.detail
     wx.navigateTo({
-      url: '/pages/list/list',
-    });
-  },
-  onShareAppMessage(){}
+      url: item.path
+    })
+  }
 })

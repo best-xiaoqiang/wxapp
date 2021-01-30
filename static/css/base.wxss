@@ -1,0 +1,24 @@
+.dy-btn{
+  padding: 20rpx 30rpx;
+  margin-bottom: 20rpx;
+  background-color: black;
+  border-radius: 100rpx;
+  border: 2rpx solid white;
+}
+.dy-text{
+  color:white;
+  text-shadow:#f03740 -2rpx -5rpx, #2addfd 5rpx 0px;
+}
+.btn-hover-class{
+  transform: scale(0.96,0.96);
+}
+.flex-middle{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.flex-center{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

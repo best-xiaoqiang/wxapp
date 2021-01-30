@@ -1,15 +1,13 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/list/list",
-    "pages/view/view",
-    "pages/new/new"
+    "pages/cover/cover"
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "打啦",
-    "navigationBarTextStyle": "black"
+    "navigationBarBackgroundColor": "#000000",
+    "navigationBarTitleText": "工具",
+    "navigationBarTextStyle": "white"
   },
   "sitemapLocation": "sitemap.json"
 }

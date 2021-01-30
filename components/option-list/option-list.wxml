@@ -1,0 +1,10 @@
+<view class="option-list-comp flex-center">
+  <view class="dy-btn flex-middle"
+    hover-class="btn-hover-class"
+    wx:for="{{list}}" 
+    wx:key="index"
+    bindtap = "optionTap"
+    data-item="{{item}}">
+    <text class="dy-text">{{item.title}}</text>
+  </view>
+</view>

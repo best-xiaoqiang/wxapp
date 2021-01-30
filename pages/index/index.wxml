@@ -1,8 +1,3 @@
-<view class="wrap">
-    <open-data class="avatar" type="userAvatarUrl" open-gid=""></open-data>
-    <view class="nickname">
-        <open-data type="userNickName" open-gid=""></open-data><text>的清单</text>
-    </view>
-    <button class="btn" type="primary" bindtap="goNew">新建清单</button>
-    <button class="btn" type="primary" bindtap="goList">历史清单</button>
+<view class="index-wrap">
+  <OptionList list="{{optionList}}" bindoptionTap="optionTap"></OptionList>
 </view>

@@ -7,7 +7,7 @@
 }
 .dy-text{
   color:white;
-  text-shadow:#f03740 -2rpx -5rpx, #2addfd 5rpx 0px;
+  /* text-shadow:#f03740 -2rpx -5rpx, #2addfd 5rpx 0px; */
 }
 .btn-hover-class{
   transform: scale(0.96,0.96);

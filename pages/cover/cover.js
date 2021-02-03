@@ -61,10 +61,12 @@ Page({
     query.select('#myCanvas')
       .fields({ node: true, size: true })
       .exec((res) => {
+        console.log('canvasNode', res)
         const canvas = res[0].node
         const ctx = canvas.getContext('2d')
 
         const dpr = wx.getSystemInfoSync().pixelRatio
+        console.log('dpr', dpr)
         canvas.width = res[0].width * dpr
         canvas.height = res[0].height * dpr
         ctx.scale(dpr, dpr)
@@ -77,7 +79,13 @@ Page({
         ctx.fillText('点点滴滴', 0, 40)
         console.log('canvasss', ctx)
         // imgPath = 'https://dl.weshineapp.com/gif/20200831/1598847091_5f4c78737f80c.png'
-        ctx.drawImage(imgPath, 10, 10)
+        
+
+        let imgNode = canvas.createImage()
+        imgNode.src = imgPath
+        imgNode.onload = () => {
+          ctx.drawImage(imgNode, 0, 0, 100, 100)
+        }
       })
       
   }

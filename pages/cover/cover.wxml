@@ -4,6 +4,16 @@
 <view bindtap="drawAndSave">
   点击生成
 </view>
+
+<movable-area class="movable-area" scale-area="false" style="height: {{600*drawOption.canvasH/drawOption.canvasW}}rpx;">
+  <movable-view class="" direction="none" inertia="false" out-of-bounds="false" x="" y="" damping="20" 
+    friction="2" disabled="false" scale="false" scale-min="0.5" scale-max="10" scale-value="1" 
+    animation="true" bindchange="onMove" bindscale="">
+    
+  </movable-view>
+</movable-area>
+
+
 <canvas canvas-id="myCanvas" 
   class="canvas"
   style="width: {{drawOption.canvasW}}px;height: {{drawOption.canvasH}}px;"

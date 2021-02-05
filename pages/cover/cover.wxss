@@ -4,3 +4,7 @@
   left: -5000000000px;
   right: -5000000000px;
 }
+.movable-area{
+  width: 600rpx;
+  background-color: yellow;
+}

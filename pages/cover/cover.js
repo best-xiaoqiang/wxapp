@@ -18,8 +18,8 @@ Page({
       imgY: 0,
       imgW: 0,
       imgH: 0,
-      canvasW: 0,
-      canvasH: 0,
+      canvasW: 1,
+      canvasH: 1,
     },
     joinCount: 3,
   },
@@ -132,5 +132,8 @@ Page({
         filePath: pathToSave
       })
     })
+  },
+  onMove(){
+    
   }
 })

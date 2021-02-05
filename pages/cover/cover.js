@@ -16,6 +16,8 @@ Page({
       img: '',
       imgX: 0,
       imgY: 0,
+      imgW: 0,
+      imgH: 0,
       canvasW: 0,
       canvasH: 0,
     },
@@ -43,10 +45,18 @@ Page({
       canvasW = imgW
       canvasH = canvasW/targetRatio
     }
+    console.log('>>>>>', imgW, imgH, canvasW, canvasH)
     this.setData({
-      ['drawOption.img']: path,
-      [`drawOption.canvasW`]: canvasW,
-      [`drawOption.canvasH`]: canvasH,
+      drawOption: {
+        ...this.data.drawOption,
+        img: path,
+        imgW,
+        imgH,
+        imgX: (canvasW - imgW)/2,
+        imgY: (canvasH - imgH)/2,
+        canvasW,
+        canvasH
+      },
       perWidth: canvasW/columnCount,
       perHeight: canvasH/this.getRowCount()
     })
@@ -69,13 +79,14 @@ Page({
   },
   drawImage(){
     const ctx = this.ctx
-    const {img, imgX, imgY, canvasW, canvasH} = this.data.drawOption
+    const {img, imgW, imgH, imgX, imgY} = this.data.drawOption
+    console.log('xxxx', imgW, imgH, imgX, imgY)
     ctx.drawImage(
       img,
       imgX,
       imgY,
-      canvasW,
-      canvasH
+      imgW,
+      imgH
     )
   },
   drawText(){
@@ -91,11 +102,10 @@ Page({
   save(){
     let pArr = []
     const {joinCount, perWidth, perHeight, drawOption} = this.data
-    const {imgX, imgY} = drawOption
     for (let i = 0; i < joinCount; i++) {
       const params = {
-        x: imgX + perWidth * (i % columnCount),
-        y: imgY + perHeight * parseInt(i / columnCount),
+        x: perWidth * (i % columnCount),
+        y: perHeight * parseInt(i / columnCount),
         width: perWidth,
         height: perHeight
       }

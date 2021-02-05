@@ -1,1 +1,6 @@
 /* pages/cover/cover.wxss */
+.canvas{
+  position: fixed;
+  left: -5000000000px;
+  right: -5000000000px;
+}

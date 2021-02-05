@@ -1,92 +1,126 @@
 const { default: wxPromise } = require("../../utils/wx-promise")
-
+const device = wx.getSystemInfoSync() // 获取设备信息
+console.log(device)
+const devicePixelRatio = device.devicePixelRatio
+    const width = device.windowWidth // 示例为一个与屏幕等宽的正方形裁剪框
+    const height = width
 // pages/cover/cover.js
+const columnCount = 3
+const app =  getApp();
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    perRatio: 720/1280, // 单个图片比例
+    perWidth: 0,
+    perHeight: 0,
+    drawOption: {
+      img: '',
+      imgX: 0,
+      imgY: 0,
+      canvasW: 0,
+      canvasH: 0,
+    },
+    joinCount: 3,
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
   onReady: function () {
-    // this.drawImage()
+    this.initCanvas()
   },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
-  },
-
   onShareAppMessage: function () {
 
   },
-
-  uploadTap(){
-    wxPromise.chooseImage({count: 1}).then(res => {
-      const tempFilePath = res.tempFilePaths[0]
-      this.drawImage(tempFilePath)
+  getRowCount(){
+    return Math.ceil(this.data.joinCount/columnCount)
+  },
+  onImgChange({path, imgW, imgH}){
+    const {perRatio} = this.data
+    const targetRatio = perRatio * columnCount / this.getRowCount()
+    const imgRatio = imgW/imgH
+    let canvasW, canvasH
+    if(imgRatio>targetRatio){
+      canvasH = imgH
+      canvasW = canvasH*targetRatio
+    }else{
+      canvasW = imgW
+      canvasH = canvasW/targetRatio
+    }
+    this.setData({
+      ['drawOption.img']: path,
+      [`drawOption.canvasW`]: canvasW,
+      [`drawOption.canvasH`]: canvasH,
+      perWidth: canvasW/columnCount,
+      perHeight: canvasH/this.getRowCount()
     })
   },
-
-  drawImage(imgPath){
-    const query = wx.createSelectorQuery()
-    query.select('#myCanvas')
-      .fields({ node: true, size: true })
-      .exec((res) => {
-        console.log('canvasNode', res)
-        const canvas = res[0].node
-        const ctx = canvas.getContext('2d')
-
-        const dpr = wx.getSystemInfoSync().pixelRatio
-        console.log('dpr', dpr)
-        canvas.width = res[0].width * dpr
-        canvas.height = res[0].height * dpr
-        ctx.scale(dpr, dpr)
-        ctx.fillStyle = 'red'
-        ctx.fillRect(0, 0, 100, 100)
-
-        ctx.fillStyle = 'blue'
-        ctx.font="40px Arial";
-        ctx.textAign = 'center'
-        ctx.fillText('点点滴滴', 0, 40)
-        console.log('canvasss', ctx)
-        // imgPath = 'https://dl.weshineapp.com/gif/20200831/1598847091_5f4c78737f80c.png'
-        
-
-        let imgNode = canvas.createImage()
-        imgNode.src = imgPath
-        imgNode.onload = () => {
-          ctx.drawImage(imgNode, 0, 0, 100, 100)
-        }
+  uploadTap(){
+    wxPromise.chooseImage({
+      count: 1,
+      sizeType: ['original']
+    })
+    .then(res => {
+      var pic = res.tempFilePaths[0]
+      wxPromise.getImageInfo(pic).then(res => {
+        const {width, height, path} = res
+        this.onImgChange({path, imgW: width, imgH: height})
       })
-      
+    })
+  },
+  initCanvas(){
+    this.ctx = wx.createCanvasContext("myCanvas");
+  },
+  drawImage(){
+    const ctx = this.ctx
+    const {img, imgX, imgY, canvasW, canvasH} = this.data.drawOption
+    ctx.drawImage(
+      img,
+      imgX,
+      imgY,
+      canvasW,
+      canvasH
+    )
+  },
+  drawText(){
+
+  },
+  drawAndSave(){
+    this.drawImage()
+    this.drawText()
+    this.ctx.draw(false, ()=>{
+      this.save()
+    })
+  },
+  save(){
+    let pArr = []
+    const {joinCount, perWidth, perHeight, drawOption} = this.data
+    const {imgX, imgY} = drawOption
+    for (let i = 0; i < joinCount; i++) {
+      const params = {
+        x: imgX + perWidth * (i % columnCount),
+        y: imgY + perHeight * parseInt(i / columnCount),
+        width: perWidth,
+        height: perHeight
+      }
+      pArr.push(this.saveP(params))
+    }
+    Promise.all(pArr).then(res => {
+      wx.showModal({
+        content: '保存成功'
+      });
+    })
+  },
+  saveP({x, y, width, height}){
+    return wxPromise.canvasToTempFilePath({
+      x,
+      y,
+      width,
+      height,
+      destWidth: width,
+      destHeight: height,
+      canvasId: 'myCanvas',
+    }, this).then(res => {
+      const pathToSave = res.tempFilePath
+      return wxPromise.saveImage({
+        filePath: pathToSave
+      })
+    })
   }
 })

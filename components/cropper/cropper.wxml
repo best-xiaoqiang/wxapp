@@ -1,0 +1,21 @@
+<view class="cropper-comp-wrap ab-fill">
+  <view class="cropper-canvas-wrap">
+    <canvas
+      class="cropper"
+      disable-scroll="true"
+      bindtouchstart="touchStart"
+      bindtouchmove="touchMove"
+      bindtouchend="touchEnd"
+      style="width: {{cropperOpt.width}}px; height: {{cropperOpt.height}}px"
+      canvas-id="cropper"
+      id="cropper"
+    >
+    </canvas>
+  </view>
+  <view class="cropper-tip">您可以拖动、缩放调整图片裁剪至合适的比例</view>
+  <view class="cropper-btn-wrap">
+    <view class="cropper-btn" bindtap="getCropperImage">
+      <text>完成</text>
+    </view>
+  </view>
+</view>

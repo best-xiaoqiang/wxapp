@@ -1,6 +1,8 @@
+
+  
 /**
- * we-cropper v1.2.0
- * (c) 2018 dlhandsome
+ * we-cropper v1.3.10
+ * (c) 2021 dlhandsome
  * @license MIT
  */
 (function (global, factory) {
@@ -11,10 +13,6 @@
 
 var device = void 0;
 var TOUCH_STATE = ['touchstarted', 'touchmoved', 'touchended'];
-
-function isFunction (obj) {
-  return typeof obj === 'function'
-}
 
 function firstLetterUpper (str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
@@ -43,6 +41,9 @@ function	getDevice () {
 }
 
 var tmp = {};
+
+var ref = getDevice();
+var pixelRatio = ref.pixelRatio;
 
 var DEFAULT = {
   id: {
@@ -81,6 +82,18 @@ var DEFAULT = {
       tmp.height = value;
     }
   },
+  pixelRatio: {
+    default: pixelRatio,
+    get: function get () {
+      return tmp.pixelRatio
+    },
+    set: function set (value) {
+      if (typeof (value) !== 'number') {
+        console.error(("pixelRatio：" + value + " is invalid"));
+      }
+      tmp.pixelRatio = value;
+    }
+  },
   scale: {
     default: 2.5,
     get: function get () {
@@ -108,13 +121,13 @@ var DEFAULT = {
     }
   },
   src: {
-    default: 'cropper',
+    default: '',
     get: function get () {
       return tmp.src
     },
     set: function set (value) {
       if (typeof (value) !== 'string') {
-        console.error(("id：" + value + " is invalid"));
+        console.error(("src：" + value + " is invalid"));
       }
       tmp.src = value;
     }
@@ -126,9 +139,21 @@ var DEFAULT = {
     },
     set: function set (value) {
       if (typeof (value) !== 'object') {
-        console.error(("id：" + value + " is invalid"));
+        console.error(("cut：" + value + " is invalid"));
       }
       tmp.cut = value;
+    }
+  },
+  boundStyle: {
+    default: {},
+    get: function get () {
+      return tmp.boundStyle
+    },
+    set: function set (value) {
+      if (typeof (value) !== 'object') {
+        console.error(("boundStyle：" + value + " is invalid"));
+      }
+      tmp.boundStyle = value;
     }
   },
   onReady: {
@@ -169,23 +194,41 @@ var DEFAULT = {
   }
 };
 
+var ref$1 = getDevice();
+var windowWidth = ref$1.windowWidth;
+
 function prepare () {
   var self = this;
-  var ref = getDevice();
-  var windowWidth = ref.windowWidth;
 
+  // v1.4.0 版本中将不再自动绑定we-cropper实例
   self.attachPage = function () {
     var pages = getCurrentPages();
-    //  获取到当前page上下文
+    // 获取到当前page上下文
     var pageContext = pages[pages.length - 1];
-    //  把this依附在Page上下文的wecropper属性上，便于在page钩子函数中访问
-    pageContext.wecropper = self;
+    // 把this依附在Page上下文的wecropper属性上，便于在page钩子函数中访问
+    Object.defineProperty(pageContext, 'wecropper', {
+      get: function get () {
+        console.warn(
+          'Instance will not be automatically bound to the page after v1.4.0\n\n' +
+          'Please use a custom instance name instead\n\n' +
+          'Example: \n' +
+          'this.mycropper = new WeCropper(options)\n\n' +
+          '// ...\n' +
+          'this.mycropper.getCropperImage()'
+        );
+        return self
+      },
+      configurable: true
+    });
   };
 
   self.createCtx = function () {
     var id = self.id;
+    var targetId = self.targetId;
+
     if (id) {
-      self.ctx = wx.createCanvasContext(id);
+      self.ctx = self.ctx || wx.createCanvasContext(id);
+      self.targetCtx = self.targetCtx || wx.createCanvasContext(targetId);
     } else {
       console.error("constructor: create canvas context failed, 'id' must be valuable");
     }
@@ -194,14 +237,60 @@ function prepare () {
   self.deviceRadio = windowWidth / 750;
 }
 
+/**
+ * String type check
+ */
+
+/**
+ * Number type check
+ */
+
+/**
+ * Array type check
+ */
+
+/**
+ * undefined type check
+ */
+
+
+
+
+
+/**
+ * Function type check
+ */
+var isFunc = function (v) { return typeof v === 'function'; };
+/**
+ * Quick object check - this is primarily used to tell
+ * Objects from primitive values when we know the value
+ * is a JSON-compliant type.
+ */
+
+
+
+
+
+
+/**
+ * Perform no operation.
+ * Stubbing args to make Flow happy without leaving useless transpiled code
+ * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/)
+ */
+
+
+/**
+ * Check if val is a valid array index.
+ */
+
+var EVENT_TYPE = ['ready', 'beforeImageLoad', 'beforeDraw', 'imageLoad'];
+
 function observer () {
   var self = this;
 
-  var EVENT_TYPE = ['ready', 'beforeImageLoad', 'beforeDraw', 'imageLoad'];
-
   self.on = function (event, fn) {
     if (EVENT_TYPE.indexOf(event) > -1) {
-      if (typeof (fn) === 'function') {
+      if (isFunc(fn)) {
         event === 'ready'
           ? fn(self)
           : self[("on" + (firstLetterUpper(event)))] = fn;
@@ -212,6 +301,36 @@ function observer () {
     return self
   };
 }
+
+function wxPromise (fn) {
+  return function (obj) {
+    var args = [], len = arguments.length - 1;
+    while ( len-- > 0 ) args[ len ] = arguments[ len + 1 ];
+
+    if ( obj === void 0 ) obj = {};
+    return new Promise(function (resolve, reject) {
+      obj.success = function (res) {
+        resolve(res);
+      };
+      obj.fail = function (err) {
+        reject(err);
+      };
+      fn.apply(void 0, [ obj ].concat( args ));
+    })
+  }
+}
+
+function draw (ctx, reserve) {
+  if ( reserve === void 0 ) reserve = false;
+
+  return new Promise(function (resolve) {
+    ctx.draw(reserve, resolve);
+  })
+}
+
+var getImageInfo = wxPromise(wx.getImageInfo);
+
+var canvasToTempFilePath = wxPromise(wx.canvasToTempFilePath);
 
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -429,11 +548,10 @@ function getImageData (canvasId, x, y, width, height, done) {
     width: width,
     height: height,
     success: function success (res) {
-      done(res);
+      done(res, null);
     },
     fail: function fail (res) {
-      done(null);
-      console.error('canvasGetImageData error: ' + res);
+      done(null, res);
     }
   });
 }
@@ -564,9 +682,9 @@ function convertToImage (canvasId, x, y, width, height, type, done) {
   if (type === undefined) { type = 'png'; }
   type = fixType(type);
   if (/bmp/.test(type)) {
-    getImageData(canvasId, x, y, width, height, function (data) {
+    getImageData(canvasId, x, y, width, height, function (data, err) {
       var strData = genBitmapImage(data);
-      isFunction(done) && done(makeURI(strData, 'image/' + type));
+      isFunc(done) && done(makeURI(strData, 'image/' + type), err);
     });
   } else {
     console.error('暂不支持生成\'' + type + '\'类型的base64图片');
@@ -600,41 +718,51 @@ var CanvasToBase64 = {
 function methods () {
   var self = this;
 
-  var id = self.id;
-  var deviceRadio = self.deviceRadio;
   var boundWidth = self.width; // 裁剪框默认宽度，即整个画布宽度
   var boundHeight = self.height; // 裁剪框默认高度，即整个画布高度
+
+  var id = self.id;
+  var targetId = self.targetId;
+  var pixelRatio = self.pixelRatio;
+
   var ref = self.cut;
   var x = ref.x; if ( x === void 0 ) x = 0;
   var y = ref.y; if ( y === void 0 ) y = 0;
   var width = ref.width; if ( width === void 0 ) width = boundWidth;
   var height = ref.height; if ( height === void 0 ) height = boundHeight;
 
-  self.updateCanvas = function () {
+  self.updateCanvas = function (done) {
     if (self.croperTarget) {
       //  画布绘制图片
-      self.ctx.drawImage(self.croperTarget, self.imgLeft, self.imgTop, self.scaleWidth, self.scaleHeight);
+      self.ctx.drawImage(
+        self.croperTarget,
+        self.imgLeft,
+        self.imgTop,
+        self.scaleWidth,
+        self.scaleHeight
+      );
     }
-    isFunction(self.onBeforeDraw) && self.onBeforeDraw(self.ctx, self);
+    isFunc(self.onBeforeDraw) && self.onBeforeDraw(self.ctx, self);
 
-    self.setBoundStyle(); //	设置边界样式
-    self.ctx.draw();
+    self.setBoundStyle(self.boundStyle); //	设置边界样式
+
+    self.ctx.draw(false, done);
     return self
   };
 
-  self.pushOrign = function (src) {
+  self.pushOrigin = self.pushOrign = function (src) {
     self.src = src;
 
-    isFunction(self.onBeforeImageLoad) && self.onBeforeImageLoad(self.ctx, self);
+    isFunc(self.onBeforeImageLoad) && self.onBeforeImageLoad(self.ctx, self);
 
-    wx.getImageInfo({
-      src: src,
-      success: function success (res) {
+    return getImageInfo({ src: src })
+      .then(function (res) {
         var innerAspectRadio = res.width / res.height;
+        var customAspectRadio = width / height;
 
         self.croperTarget = res.path;
 
-        if (innerAspectRadio < width / height) {
+        if (innerAspectRadio < customAspectRadio) {
           self.rectX = x;
           self.baseWidth = width;
           self.baseHeight = width / innerAspectRadio;
@@ -651,14 +779,21 @@ function methods () {
         self.scaleWidth = self.baseWidth;
         self.scaleHeight = self.baseHeight;
 
-        self.updateCanvas();
+        self.update();
 
-        isFunction(self.onImageLoad) && self.onImageLoad(self.ctx, self);
-      }
-    });
+        return new Promise(function (resolve) {
+          self.updateCanvas(resolve);
+        })
+      })
+      .then(function () {
+        isFunc(self.onImageLoad) && self.onImageLoad(self.ctx, self);
+      })
+  };
 
-    self.update();
-    return self
+  self.removeImage = function () {
+    self.src = '';
+    self.croperTarget = '';
+    return draw(self.ctx)
   };
 
   self.getCropperBase64 = function (done) {
@@ -673,58 +808,65 @@ function methods () {
     }, done);
   };
 
-  self.getCropperImage = function () {
-    const LINEWIDTH = 3
-    var args = [], len = arguments.length;
-    while ( len-- ) args[ len ] = arguments[ len ];
+  self.getCropperImage = function (opt, fn) {
+    var customOptions = Object.assign({fileType: 'jpg'}, opt);
+    var callback = isFunc(opt) ? opt : isFunc(fn) ? fn : null;
 
-    var ARG_TYPE = toString.call(args[0]);
-    var fn = args[args.length - 1];
+    var canvasOptions = {
+      canvasId: id,
+      x: x,
+      y: y,
+      width: width,
+      height: height
+    };
 
-    switch (ARG_TYPE) {
-      case '[object Object]':
-        var ref = args[0];
-    var quality = ref.quality; if ( quality === void 0 ) quality = 10;
+    var task = function () { return Promise.resolve(); };
 
-        if (typeof (quality) !== 'number') {
-          console.error(("quality：" + quality + " is invalid"));
-        } else if (quality < 0 || quality > 10) {
-          console.error("quality should be ranged in 0 ~ 10");
-        }
-        wx.canvasToTempFilePath({
-          canvasId: id,
-          x: x + LINEWIDTH,
-          y: y + LINEWIDTH,
-          width: width - LINEWIDTH * 2,
-          height: height - LINEWIDTH * 2,
-          destWidth: width * quality / (deviceRadio * 10),
-          destHeight: height * quality / (deviceRadio * 10),
-          success: function success (res) {
-            isFunction(fn) && fn.call(self, res.tempFilePath);
-          },
-          fail: function fail (res) {
-            isFunction(fn) && fn.call(self, null);
-          }
-        }); break
-      case '[object Function]':
-        wx.canvasToTempFilePath({
-          canvasId: id,
-          x: x + LINEWIDTH,
-          y: y + LINEWIDTH,
-          width: width - LINEWIDTH * 2,
-          height: height - LINEWIDTH * 2,
-          destWidth: width / deviceRadio,
-          destHeight: height / deviceRadio,
-          success: function success (res) {
-            isFunction(fn) && fn.call(self, res.tempFilePath);
-          },
-          fail: function fail (res) {
-            isFunction(fn) && fn.call(self, null);
-          }
-        }); break
+    if (customOptions.original) {
+      // original mode
+      task = function () {
+        self.targetCtx.drawImage(
+          self.croperTarget,
+          self.imgLeft * pixelRatio,
+          self.imgTop * pixelRatio,
+          self.scaleWidth * pixelRatio,
+          self.scaleHeight * pixelRatio
+        );
+
+        canvasOptions = {
+          canvasId: targetId,
+          x: x * pixelRatio,
+          y: y * pixelRatio,
+          width: width * pixelRatio,
+          height: height * pixelRatio
+        };
+
+        return draw(self.targetCtx)
+      };
     }
 
-    return self
+    return task()
+      .then(function () {
+        Object.assign(canvasOptions, customOptions);
+        var arg = canvasOptions.componentContext
+          ? [canvasOptions, canvasOptions.componentContext]
+          : [canvasOptions];
+
+        return canvasToTempFilePath.apply(null, arg)
+      })
+      .then(function (res) {
+        var tempFilePath = res.tempFilePath;
+        return callback
+          ? callback.call(self, tempFilePath, null)
+          : tempFilePath
+      })
+      .catch(function (err) {
+        if (callback) {
+          callback.call(self, null, err);
+        } else {
+          throw err
+        }
+      })
   };
 }
 
@@ -825,6 +967,8 @@ var handle = {
     var touch0 = ref[0];
     var touch1 = ref[1];
 
+    if (!self.src) { return }
+
     setTouchState(self, true, null, null);
 
     // 计算第一个触摸点的位置，并参照改点进行缩放
@@ -843,6 +987,8 @@ var handle = {
     var touch0 = ref[0];
     var touch1 = ref[1];
 
+    if (!self.src) { return }
+
     setTouchState(self, null, true);
 
     // 单指手势时触发
@@ -857,6 +1003,8 @@ var handle = {
 
   touchEnd: function touchEnd (e) {
     var self = this;
+
+    if (!self.src) { return }
 
     setTouchState(self, false, false, true);
     self.__xtouchEnd();
@@ -899,84 +1047,33 @@ function cut () {
 	 */
   self.setBoundStyle = function (ref) {
     if ( ref === void 0 ) ref = {};
-    var color = ref.color; if (color === void 0) color = '#ffffff';
-    var bordercolor = ref.bordercolor; if (bordercolor === void 0) bordercolor = 'rgba(255, 255, 255, 0.4)';
+    var color = ref.color; if ( color === void 0 ) color = '#04b00f';
     var mask = ref.mask; if ( mask === void 0 ) mask = 'rgba(0, 0, 0, 0.3)';
-    var lineWidth = ref.lineWidth; if (lineWidth === void 0) lineWidth = 2;
-    var borderWidth = ref.borderWidth; if ( borderWidth === void 0 ) borderWidth = 1;
+    var lineWidth = ref.lineWidth; if ( lineWidth === void 0 ) lineWidth = 1;
 
-    // 边界位置1（原版，在图片外侧）：
-    // var boundOption = [
-    //   {
-    //     start: { x: x - lineWidth, y: y + 10 - lineWidth },
-    //     step1: { x: x - lineWidth, y: y - lineWidth },
-    //     step2: { x: x + 10 - lineWidth, y: y - lineWidth }
-    //   },
-    //   {
-    //     start: { x: x - lineWidth, y: y + height - 10 + lineWidth },
-    //     step1: { x: x - lineWidth, y: y + height + lineWidth },
-    //     step2: { x: x + 10 - lineWidth, y: y + height + lineWidth }
-    //   },
-    //   {
-    //     start: { x: x + width - 10 + lineWidth, y: y - lineWidth },
-    //     step1: { x: x + width + lineWidth, y: y - lineWidth },
-    //     step2: { x: x + width + lineWidth, y: y + 10 - lineWidth }
-    //   },
-    //   {
-    //     start: { x: x + width + lineWidth, y: y + height - 10 + lineWidth },
-    //     step1: { x: x + width + lineWidth, y: y + height + lineWidth },
-    //     step2: { x: x + width - 10 + lineWidth, y: y + height + lineWidth }
-    //   }
-    // ];
-
-    // 边界位置2（lineWidth/2, 在内侧, 合成时也会把边界合成进去）
+    var half = lineWidth / 2;
     var boundOption = [
       {
-        start: { x: x + lineWidth/2, y: y + 10 + lineWidth/2 },
-        step1: { x: x + lineWidth/2, y: y + lineWidth/2 },
-        step2: { x: x + 10 + lineWidth/2, y: y + lineWidth/2 }
+        start: { x: x - half, y: y + 10 - half },
+        step1: { x: x - half, y: y - half },
+        step2: { x: x + 10 - half, y: y - half }
       },
       {
-        start: { x: x + lineWidth/2, y: y + height - 10 - lineWidth/2 },
-        step1: { x: x + lineWidth/2, y: y + height - lineWidth/2 },
-        step2: { x: x + 10 + lineWidth/2, y: y + height - lineWidth/2 }
+        start: { x: x - half, y: y + height - 10 + half },
+        step1: { x: x - half, y: y + height + half },
+        step2: { x: x + 10 - half, y: y + height + half }
       },
       {
-        start: { x: x + width - 10 - lineWidth/2, y: y + lineWidth/2 },
-        step1: { x: x + width - lineWidth/2, y: y + lineWidth/2 },
-        step2: { x: x + width - lineWidth/2, y: y + 10 + lineWidth/2 }
+        start: { x: x + width - 10 + half, y: y - half },
+        step1: { x: x + width + half, y: y - half },
+        step2: { x: x + width + half, y: y + 10 - half }
       },
       {
-        start: { x: x + width - lineWidth/2, y: y + height - 10 - lineWidth/2 },
-        step1: { x: x + width - lineWidth/2, y: y + height - lineWidth/2 },
-        step2: { x: x + width - 10 - lineWidth/2, y: y + height - lineWidth/2 }
+        start: { x: x + width + half, y: y + height - 10 + half },
+        step1: { x: x + width + half, y: y + height + half },
+        step2: { x: x + width - 10 + half, y: y + height + half }
       }
     ];
-
-
-    // 边界位置3（lineWidth/2, 外侧）
-    // var boundOption = [
-      // { //左上角
-      //   start: { x: x - lineWidth/2, y: y + 10 },
-      //   step1: { x: x - lineWidth/2, y: y - lineWidth/2 },
-      //   step2: { x: x + 10, y: y - lineWidth/2 }
-      // },
-      // { //左下角
-      //   start: { x: x - lineWidth/2, y: y + height - 10},
-      //   step1: { x: x - lineWidth/2, y: y + height + lineWidth/2 },
-      //   step2: { x: x + 10, y: y + height + lineWidth/2 }
-      // },
-      // { //右上角
-      //   start: { x: x + width - 10 , y: y - lineWidth/2 },
-      //   step1: { x: x + width + lineWidth/2, y: y - lineWidth/2 },
-      //   step2: { x: x + width + lineWidth/2, y: y + 10 }
-      // },
-      // { //右下角
-      //   start: { x: x + width + lineWidth/2, y: y + height - 10 },
-      //   step1: { x: x + width + lineWidth/2, y: y + height + lineWidth/2 },
-      //   step2: { x: x + width - 10, y: y + height + lineWidth/2 }
-      // }
-    // ];
 
     // 绘制半透明层
     self.ctx.beginPath();
@@ -987,7 +1084,6 @@ function cut () {
     self.ctx.fillRect(x + width, 0, boundWidth - x - width, boundHeight);
     self.ctx.fill();
 
-    // 绘制边界
     boundOption.forEach(function (op) {
       self.ctx.beginPath();
       self.ctx.setStrokeStyle(color);
@@ -997,34 +1093,12 @@ function cut () {
       self.ctx.lineTo(op.step2.x, op.step2.y);
       self.ctx.stroke();
     });
-
-    // 绘制边1（根据设计图新增的）
-    // self.ctx.beginPath();
-    // self.ctx.setStrokeStyle(bordercolor);
-    // self.ctx.setLineWidth(borderWidth);
-    // self.ctx.moveTo(x + borderWidth, y + borderWidth);
-    // self.ctx.lineTo(x + width - borderWidth, y + borderWidth);
-    // self.ctx.lineTo(x + width - borderWidth, y + height - borderWidth);
-    // self.ctx.lineTo(x + borderWidth, y + height - borderWidth);
-    // self.ctx.lineTo(x + borderWidth, y + borderWidth);
-    // self.ctx.stroke();
-
-    // 绘制边2（borderWidth/2）
-    self.ctx.beginPath();
-    self.ctx.setStrokeStyle(bordercolor);
-    self.ctx.setLineWidth(borderWidth);
-    self.ctx.moveTo(x + borderWidth/2, y + borderWidth/2);
-    self.ctx.lineTo(x + width - borderWidth/2, y + borderWidth/2);
-    self.ctx.lineTo(x + width - borderWidth/2, y + height - borderWidth/2);
-    self.ctx.lineTo(x + borderWidth/2, y + height - borderWidth/2);
-    self.ctx.lineTo(x + borderWidth/2, y + borderWidth/2);
-    self.ctx.stroke();
   };
 }
 
-var version = "1.2.0";
+var version = "1.3.10";
 
-var weCropper = function weCropper (params) {
+var WeCropper = function WeCropper (params) {
   var self = this;
   var _default = {};
 
@@ -1047,7 +1121,7 @@ var weCropper = function weCropper (params) {
   return self
 };
 
-weCropper.prototype.init = function init () {
+WeCropper.prototype.init = function init () {
   var self = this;
   var src = self.src;
 
@@ -1057,6 +1131,8 @@ weCropper.prototype.init = function init () {
 
   if (src) {
     self.pushOrign(src);
+  } else {
+    self.updateCanvas();
   }
   setTouchState(self, false, false, false);
 
@@ -1066,14 +1142,14 @@ weCropper.prototype.init = function init () {
   return self
 };
 
-Object.assign(weCropper.prototype, handle);
+Object.assign(WeCropper.prototype, handle);
 
-weCropper.prototype.prepare = prepare;
-weCropper.prototype.observer = observer;
-weCropper.prototype.methods = methods;
-weCropper.prototype.cutt = cut;
-weCropper.prototype.update = update;
+WeCropper.prototype.prepare = prepare;
+WeCropper.prototype.observer = observer;
+WeCropper.prototype.methods = methods;
+WeCropper.prototype.cutt = cut;
+WeCropper.prototype.update = update;
 
-return weCropper;
+return WeCropper;
 
 })));

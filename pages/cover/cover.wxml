@@ -1,4 +1,10 @@
 <view bindtap = "uploadTap">
   点击上传
 </view>
-<canvas type="2d" id="myCanvas"></canvas>
+<view bindtap="drawAndSave">
+  点击生成
+</view>
+<canvas canvas-id="myCanvas" 
+  class="canvas"
+  style="width: {{drawOption.canvasW}}px;height: {{drawOption.canvasH}}px;"
+></canvas>

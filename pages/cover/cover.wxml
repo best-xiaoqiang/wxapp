@@ -1,20 +1,35 @@
-<view bindtap = "uploadTap">
-  点击上传
-</view>
-<view bindtap="drawAndSave">
-  点击生成
+<view class="btn-wrap-between">
+  <view class="dy-btn" bindtap = "uploadTap">
+    <text class="dy-text">上传图片</text>
+  </view>
+  <view class="dy-btn" bindtap="drawAndSave">
+    <text class="dy-text">点击生成</text>
+  </view>
 </view>
 
-<movable-area class="movable-area" scale-area="false" style="height: {{600*drawOption.canvasH/drawOption.canvasW}}rpx;">
-  <movable-view class="" direction="none" inertia="false" out-of-bounds="false" x="" y="" damping="20" 
-    friction="2" disabled="false" scale="false" scale-min="0.5" scale-max="10" scale-value="1" 
-    animation="true" bindchange="onMove" bindscale="">
-    
-  </movable-view>
-</movable-area>
+<view class="movable-area-wrap">
+  <view class="move-mask move-mask-row one-px-b"></view>
+  <view class="movable-area-row">
+    <view class="move-mask move-mask-column one-px-r"></view>
+    <movable-area class="movable-area" scale-area="false" style="height: {{canvasUiW*canvasH/canvasW}}rpx;">
+      <movable-view class="" direction="all" inertia="false" out-of-bounds="{{true}}" x="" y="" damping="{{100}}" 
+        friction="2" scale="false" scale-min="{{1}}" scale-max="10" scale-value="1" 
+        animation="true" bindchange="onMove" bindscale=""
+        style="width: {{canvasUiW*imgW/canvasW}}rpx; height: {{canvasUiW*imgH/canvasW}}rpx;">
+        <image class="image" src="{{img}}"></image>
+      </movable-view>
+      <!-- 分割线 -->
+      <view class="cut-line-column one-px-l" style="left: {{100/3 + '%'}}"></view>
+      <view class="cut-line-column one-px-l" style="left: {{100/3*2 + '%'}}"></view>
+    </movable-area>
+    <view class="move-mask move-mask-column one-px-l"></view>
+  </view>
+  <view class="move-mask move-mask-row one-px-t"></view>
+</view>
+
 
 
 <canvas canvas-id="myCanvas" 
   class="canvas"
-  style="width: {{drawOption.canvasW}}px;height: {{drawOption.canvasH}}px;"
+  style="width: {{canvasW}}px;height: {{canvasH}}px;"
 ></canvas>

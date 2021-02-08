@@ -12,16 +12,15 @@ Page({
     perRatio: 720/1280, // 单个图片比例
     perWidth: 0,
     perHeight: 0,
-    drawOption: {
-      img: '',
-      imgX: 0,
-      imgY: 0,
-      imgW: 0,
-      imgH: 0,
-      canvasW: 1,
-      canvasH: 1,
-    },
+    img: '',
+    imgX: 0,
+    imgY: 0,
+    imgW: 0,
+    imgH: 0,
+    canvasW: 1,
+    canvasH: 1,
     joinCount: 3,
+    canvasUiW: 650 // 650rpx
   },
 
   onReady: function () {
@@ -32,6 +31,16 @@ Page({
   },
   getRowCount(){
     return Math.ceil(this.data.joinCount/columnCount)
+  },
+  refreshCanvas({imgW, imgH, canvasW, canvasH}){
+    const {imgW, imgH, canvasW, canvasH} = this.data
+    this.setData({
+      img: path,
+      imgW,
+      imgH,
+      canvasW,
+      canvasH
+    })
   },
   onImgChange({path, imgW, imgH}){
     const {perRatio} = this.data
@@ -47,16 +56,13 @@ Page({
     }
     console.log('>>>>>', imgW, imgH, canvasW, canvasH)
     this.setData({
-      drawOption: {
-        ...this.data.drawOption,
-        img: path,
-        imgW,
-        imgH,
-        imgX: (canvasW - imgW)/2,
-        imgY: (canvasH - imgH)/2,
-        canvasW,
-        canvasH
-      },
+      img: path,
+      imgW,
+      imgH,
+      imgX: (canvasW - imgW)/2,
+      imgY: (canvasH - imgH)/2,
+      canvasW,
+      canvasH,
       perWidth: canvasW/columnCount,
       perHeight: canvasH/this.getRowCount()
     })
@@ -79,7 +85,7 @@ Page({
   },
   drawImage(){
     const ctx = this.ctx
-    const {img, imgW, imgH, imgX, imgY} = this.data.drawOption
+    const {img, imgW, imgH, imgX, imgY} = this.data
     console.log('xxxx', imgW, imgH, imgX, imgY)
     ctx.drawImage(
       img,
@@ -101,7 +107,7 @@ Page({
   },
   save(){
     let pArr = []
-    const {joinCount, perWidth, perHeight, drawOption} = this.data
+    const {joinCount, perWidth, perHeight} = this.data
     for (let i = 0; i < joinCount; i++) {
       const params = {
         x: perWidth * (i % columnCount),
@@ -133,7 +139,7 @@ Page({
       })
     })
   },
-  onMove(){
-    
+  onMove(e){
+    console.log('onMove', e)
   }
 })

@@ -5,6 +5,39 @@
   right: -5000000000px;
 }
 .movable-area{
-  width: 600rpx;
-  background-color: yellow;
+  width: 650rpx;
+  flex-shrink: 0;
+}
+.image{
+  width: 100%;
+  height: 100%;
+}
+.movable-area-wrap{
+  width: 750rpx;
+  background-color: rgba(53, 53, 53, 1);
+  overflow: hidden;
+}
+.move-mask-row{
+  width: 100%;
+  height: 50rpx;
+}
+.movable-area-row{
+  display: flex;
+  width: 100%;
+}
+.move-mask-column{
+  flex: 1;
+}
+.move-mask{
+  background-color: rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1;
+}
+.move-mask-row.one-px-t::after, .move-mask-row.one-px-b::after{
+  left: 50rpx;
+  right: 50rpx;
+  width: initial;
+}
+.one-px-t::after, .one-px-b::after, .one-px-l::after, .one-px-r::after{
+  background-color: greenyellow;
 }
